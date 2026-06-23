@@ -1,0 +1,23 @@
+# IntelliJ IDEA
+.idea
+*.iml
+*.ipr
+*.iws
+
+# Gradle
+.gradle
+**/build/
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# virtual machine crash logs
+hs_err_pid*
+
+# Keep the Gradle wrapper (jar + scripts) tracked on purpose.
+!gradle/wrapper/gradle-wrapper.jar
+!gradlew
+!gradlew.bat

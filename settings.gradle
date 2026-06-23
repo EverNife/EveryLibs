@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'EveryLibs'
+
+include 'common'
+include 'reflection'
+include 'utils'
+include 'executors'

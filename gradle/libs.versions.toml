@@ -1,0 +1,22 @@
+[versions]
+# Project version - single source of truth. Consumed by the root build.gradle
+# (every module's `version`).
+everylibs = "1.0.0"
+
+# Jabel lets a Java 17 compiler emit Java 8 bytecode (see root build.gradle).
+jabel = "0.4.2"
+lombok = "1.18.42"
+# jakarta.annotation-api ships jakarta.annotation.Nonnull/Nullable (used in a few
+# public signatures). Compile-only: CLASS-retention annotations need no runtime jar.
+jakarta-annotation = "2.1.1"
+junit = "5.10.0"
+
+[libraries]
+jabel = { module = "com.github.bsideup.jabel:jabel-javac-plugin", version.ref = "jabel" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+# Gradle 9 no longer ships the JUnit Platform launcher to test JVMs - it must be on the test runtime classpath.
+# Platform 1.x pairs with Jupiter 5.x (1.10 <-> 5.10).
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version = "1.10.0" }

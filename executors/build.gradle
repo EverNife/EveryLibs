@@ -1,0 +1,28 @@
+// Folder is 'executors'; the published artifact is 'everylibs-executors'.
+//
+// Thread/executor helpers: a virtual-thread-aware executor factory, a naming
+// ThreadFactory and a hybrid scheduled executor. Virtual threads are reached via
+// reflection (guarded by FCJavaVersion), so the Java 8 bytecode floor still holds.
+base {
+    archivesName = 'everylibs-executors'
+}
+
+// Toolchain (Java 25) and the dual-target compileJava override (Java 17 syntax ->
+// Java 8 bytecode via Jabel) are configured centrally in the root build.gradle.
+
+dependencies {
+    // api: MinMax (from :common) appears in FCExecutorsUtil's public return type.
+    api project(':common')
+    // implementation: FCReflectionUtil is used only inside method bodies (to look up
+    // Executors.newVirtualThreadPerTaskExecutor), never in a public signature.
+    implementation project(':reflection')
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'everylibs-executors'
+            from components.java
+        }
+    }
+}

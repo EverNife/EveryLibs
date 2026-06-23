@@ -1,0 +1,26 @@
+// Folder is 'utils'; the published artifact is 'everylibs-utils'.
+//
+// Generic, framework-agnostic helpers: time, input parsing, files, collections,
+// math and the NumberWrapper. Depends on :common for the commons primitives
+// (MergeListResult, SimpleEntry) used in a few signatures.
+base {
+    archivesName = 'everylibs-utils'
+}
+
+// Toolchain (Java 25) and the dual-target compileJava override (Java 17 syntax ->
+// Java 8 bytecode via Jabel) are configured centrally in the root build.gradle.
+
+dependencies {
+    // api, not implementation: MergeListResult appears in FCCollectionsUtil's public
+    // return type, so consumers compile against :common types.
+    api project(':common')
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'everylibs-utils'
+            from components.java
+        }
+    }
+}

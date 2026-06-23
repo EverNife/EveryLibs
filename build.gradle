@@ -1,0 +1,115 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+// Project version: single source of truth is gradle/libs.versions.toml ([versions].everylibs).
+def everylibsVersion = libs.versions.everylibs.get()
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'idea'
+    apply plugin: 'maven-publish'
+
+    group = 'br.com.finalcraft.everylibs'
+    version = everylibsVersion
+
+    java {
+        withSourcesJar()
+        // One toolchain for the whole build: launch Gradle with any modern JDK
+        // (Java 25 recommended - Gradle 9.5 runs on it directly) and this toolchain
+        // compiles and runs everything, EXCEPT the dual-target compileJava override
+        // below. Test code always compiles and runs on Java 25 (full modern API).
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
+    //This might keep function(parameter variable's Names) on the compiled jar
+    compileJava.options.compilerArgs.add '-parameters'
+    compileTestJava.options.compilerArgs.add '-parameters'
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+        testLogging {
+            events = [TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED]
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url = 'https://maven.petrus.dev/public' }
+    }
+
+    dependencies {
+        // jakarta.annotation.Nonnull/Nullable appear in a handful of signatures. CLASS-retention,
+        // so compileOnly keeps them out of every published POM without breaking compilation.
+        compileOnly libs.jakarta.annotation.api
+
+        //Lombok
+        compileOnly libs.lombok
+        annotationProcessor libs.lombok
+        testCompileOnly libs.lombok
+        testAnnotationProcessor libs.lombok
+
+        // JUnit 5 (compiles/runs on the Java 25 toolchain)
+        testImplementation libs.junit.jupiter.api
+        testRuntimeOnly libs.junit.jupiter.engine
+        // Gradle 9 no longer provides the JUnit Platform launcher from its own
+        // distribution - every test JVM needs it on the runtime classpath.
+        testRuntimeOnly libs.junit.platform.launcher
+    }
+
+    // Publications are defined per module (each sets its own everylibs-* artifactId).
+    publishing {
+        repositories {
+            maven {
+                name = "PetrusRepo"
+                url = "https://maven.petrus.dev/public"
+                credentials {
+                    username = System.env.PETRUSMAVEN_ACTOR
+                    password = System.env.PETRUSMAVEN_TOKEN
+                }
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+        }
+    }
+}
+
+// ======================================================================
+//  Dual-target: Java 17 source syntax -> Java 8 bytecode (every module)
+//
+//  Production code is written in Java 17 syntax but the published artifacts
+//  must run on a Java 8 JVM. Jabel (an annotation processor) lifts javac's
+//  source-level check so a Java 17 compiler can emit Java 8 bytecode, while
+//  `options.release = 8` keeps the *API* floor honest (no Java 9+ library APIs
+//  in production code). Newer-JVM features (e.g. virtual threads) are reached
+//  by runtime reflection guarded by FCJavaVersion, never compile-time refs.
+//
+//  Only compileJava is pinned to a Java 17 compiler: Jabel rides javac internals
+//  that changed after JDK 17, so the production compiler cannot follow the main
+//  toolchain to 25. Everything else (Gradle itself, test compilation, test
+//  execution) runs on Java 25.
+// ======================================================================
+configure(subprojects) {
+    dependencies {
+        annotationProcessor libs.jabel
+        compileOnly libs.jabel
+    }
+
+    compileJava {
+        sourceCompatibility = 17  // Java 17 *syntax* (IDE hint; Jabel lifts javac's check)
+        options.release = 8       // Java 8 *bytecode* and *API* floor
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+}

@@ -1,0 +1,19 @@
+// Folder is 'common'; the published artifact is 'everylibs-common'.
+//
+// The shared base every other module depends on: dependency-free primitives
+// (commons.*) and runtime-environment detection (version.FCJavaVersion).
+base {
+    archivesName = 'everylibs-common'
+}
+
+// Toolchain (Java 25) and the dual-target compileJava override (Java 17 syntax ->
+// Java 8 bytecode via Jabel) are configured centrally in the root build.gradle.
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'everylibs-common'
+            from components.java
+        }
+    }
+}

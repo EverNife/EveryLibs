@@ -1,0 +1,21 @@
+// Folder is 'reflection'; the published artifact is 'everylibs-reflection'.
+//
+// Lightweight reflection helpers: the per-member lookup classes (Fields/Methods/
+// Constructors/Classes/Annotations), the Accessor/Invoker interfaces, the fluent
+// ClassReflect handle, and the MethodHandle-backed internals. Leaf module: pure
+// java.lang.reflect + java.lang.invoke, no internal-project dependencies.
+base {
+    archivesName = 'everylibs-reflection'
+}
+
+// Toolchain (Java 25) and the dual-target compileJava override (Java 17 syntax ->
+// Java 8 bytecode via Jabel) are configured centrally in the root build.gradle.
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'everylibs-reflection'
+            from components.java
+        }
+    }
+}
