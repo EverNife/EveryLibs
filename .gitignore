@@ -17,6 +17,10 @@
 # virtual machine crash logs
 hs_err_pid*
 
+# The GitHub wiki is cloned into wiki/ as its own independent git repo
+# (remote: EveryLibs.wiki.git). It is versioned separately, never by this repo.
+/wiki/
+
 # Keep the Gradle wrapper (jar + scripts) tracked on purpose.
 !gradle/wrapper/gradle-wrapper.jar
 !gradlew
