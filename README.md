@@ -9,14 +9,26 @@ Every module is **written in Java 17 syntax** and **compiled to Java 8 bytecode*
 Features from newer JVMs (e.g. virtual threads) are reached through guarded runtime
 reflection, so the Java 8 floor always holds.
 
+> **Origin** — EveryLibs is extracted from, and used by,
+> [EverNifeCore](https://github.com/EverNife/EverNifeCore). It carves the
+> general-purpose pieces of that project into small, standalone artifacts that any JVM
+> project can depend on.
+
+📖 **Full documentation lives in the [Wiki](https://github.com/EverNife/EveryLibs/wiki)** —
+start with [Installation](https://github.com/EverNife/EveryLibs/wiki/Installation) and
+[Reflection](https://github.com/EverNife/EveryLibs/wiki/Reflection).
+
 ## Modules
 
 | Module      | Artifact               | Depends on            | Contents |
 |-------------|------------------------|-----------------------|----------|
-| `common`    | `everylibs-common`     | —                     | Shared primitives (`Tuple`, `Triple`, `MinMax`, `SimpleEntry`, `MergeListResult`, `TriState`) and `FCJavaVersion`. |
-| `reflection`| `everylibs-reflection` | —                     | `FCReflectionUtil` tree facade over the per-member lookups (`FieldReflection`, `MethodReflection`, `ConstructorReflection`, `ClassReflection`, `AnnotationReflection`), the `ConstructorInvoker` / `FieldAccessor` / `MethodInvoker` interfaces, the fluent `ClassReflect` handle, `ReflectionException`, and `classpath.JarFinder`. See [reflection/MIGRATION.md](reflection/MIGRATION.md). |
-| `utils`     | `everylibs-utils`      | `common`              | `FCTimeUtil`, `FCInputReader`, `FCFileUtil`, `FCCollectionsUtil`, `FCMathUtil`, `NumberWrapper`. |
+| `reflection`| `everylibs-reflection` | —                     | `FCReflectionUtil` — a tree over `MethodHandle`-backed, cached field/method/constructor/class/annotation lookups, plus the fluent `ClassReflect` handle and `classpath.JarFinder`. |
+| `common`    | `everylibs-common`     | —                     | Shared primitives: `Tuple`, `Triple`, `MinMax`, `SimpleEntry`, `MergeListResult`, `TriState`, and `FCJavaVersion`. |
+| `utils`     | `everylibs-utils`      | `common`              | `FCCollectionsUtil`, `FCTimeUtil`, `FCFileUtil`, `FCMathUtil`, `FCInputReader`, `NumberWrapper`. |
 | `executors` | `everylibs-executors`  | `common`, `reflection`| `FCExecutorsUtil`, `SimpleThreadFactory`, `VirtualThreadedScheduledExecutor`. |
+
+`reflection` is a leaf (pure `java.lang.reflect` + `java.lang.invoke`). `utils` and
+`executors` expose `common` via `api`, so it arrives transitively with them.
 
 ## Using a module (Gradle)
 
@@ -28,13 +40,13 @@ repositories {
 
 dependencies {
     implementation 'br.com.finalcraft.everylibs:everylibs-reflection:1.0.0'
-    implementation 'br.com.finalcraft.everylibs:everylibs-utils:1.0.0'
-    implementation 'br.com.finalcraft.everylibs:everylibs-executors:1.0.0'
+    // implementation 'br.com.finalcraft.everylibs:everylibs-utils:1.0.0'
+    // implementation 'br.com.finalcraft.everylibs:everylibs-executors:1.0.0'
 }
 ```
 
-The `everylibs-common` artifact arrives transitively, since every module exposes it
-via `api`.
+See [Installation](https://github.com/EverNife/EveryLibs/wiki/Installation) for Maven and
+the per-module breakdown.
 
 ## Building
 
