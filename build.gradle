@@ -43,6 +43,7 @@ subprojects {
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven { url = 'https://maven.petrus.dev/public' }
     }
@@ -85,19 +86,18 @@ subprojects {
 }
 
 // ======================================================================
-//  Dual-target: Java 17 source syntax -> Java 8 bytecode (every module)
+//  Dual-target: Java 25 source syntax -> Java 8 bytecode (every module)
 //
-//  Production code is written in Java 17 syntax but the published artifacts
+//  Production code is written in Java 25 syntax but the published artifacts
 //  must run on a Java 8 JVM. Jabel (an annotation processor) lifts javac's
-//  source-level check so a Java 17 compiler can emit Java 8 bytecode, while
+//  source-level check so a Java 25 compiler can emit Java 8 bytecode, while
 //  `options.release = 8` keeps the *API* floor honest (no Java 9+ library APIs
 //  in production code). Newer-JVM features (e.g. virtual threads) are reached
 //  by runtime reflection guarded by FCJavaVersion, never compile-time refs.
 //
-//  Only compileJava is pinned to a Java 17 compiler: Jabel rides javac internals
-//  that changed after JDK 17, so the production compiler cannot follow the main
-//  toolchain to 25. Everything else (Gradle itself, test compilation, test
-//  execution) runs on Java 25.
+//  compileJava is pinned to a Java 25 compiler (Jabel runs as a javac plugin and
+//  must match a JDK whose internals it supports). Everything else (Gradle itself,
+//  test compilation, test execution) also runs on Java 25.
 // ======================================================================
 configure(subprojects) {
     dependencies {
@@ -106,10 +106,10 @@ configure(subprojects) {
     }
 
     compileJava {
-        sourceCompatibility = 17  // Java 17 *syntax* (IDE hint; Jabel lifts javac's check)
+        sourceCompatibility = 25  // Java 25 *syntax* (IDE hint; Jabel lifts javac's check)
         options.release = 8       // Java 8 *bytecode* and *API* floor
         javaCompiler = javaToolchains.compilerFor {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(25)
         }
     }
 }
