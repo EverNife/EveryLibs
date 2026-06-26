@@ -4,6 +4,7 @@ import br.com.finalcraft.everylibs.reflection.MethodInvoker;
 import br.com.finalcraft.everylibs.reflection.internal.HandleMethodInvoker;
 import br.com.finalcraft.everylibs.reflection.internal.MemberKey;
 import br.com.finalcraft.everylibs.reflection.internal.ReflectionCache;
+import br.com.finalcraft.everylibs.reflection.internal.TypeHierarchy;
 import br.com.finalcraft.everylibs.reflection.internal.TypeMatching;
 import jakarta.annotation.Nullable;
 
@@ -22,12 +23,14 @@ import java.util.stream.Stream;
  * no matching method exists — a miss is not an exception. Every resolved invoker is cached.
  * <p>
  * A single recursive core drives every lookup, so the optional return-type filter is
- * preserved as the search walks up the superclass chain. An empty {@code params}
- * array means "ignore parameters", matching the first method of the given name
- * (fewest parameters first). An <em>exact</em> parameter/return-type match always
- * wins; a primitive/wrapper-compatible match is used only when no exact match exists,
- * so existing overload selection never changes. A real method wins over a synthetic
- * bridge of the same signature.
+ * preserved as the search walks up the superclass chain and then across implemented
+ * interfaces (picking up {@code default} methods a class does not override). An empty
+ * {@code params} array means "ignore parameters", matching the first method of the
+ * given name (fewest parameters first). An <em>exact</em> parameter/return-type match
+ * always wins; a primitive/wrapper-compatible match is used only when no exact match
+ * exists, so existing overload selection never changes. A method declared on the class
+ * (or a superclass) shadows an inherited {@code default} of the same name, and a real
+ * method wins over a synthetic bridge of the same signature.
  * <p>
  * A stateless singleton reached through {@code FCReflectionUtil.methods()} or
  * {@link #INSTANCE}.
@@ -77,24 +80,31 @@ public final class MethodReflection {
 
     /**
      * Stream every method of {@code clazz} (declared, all visibilities, across the
-     * superclass chain; a subclass override shadows the superclass declaration, and a
-     * real method wins over a synthetic bridge) that matches {@code filter}, each
-     * wrapped as a {@link MethodInvoker}.
+     * superclass chain, plus the {@code default} methods of implemented interfaces; a
+     * subclass override shadows the superclass declaration and an inherited interface
+     * {@code default}, and a real method wins over a synthetic bridge) that matches
+     * {@code filter}, each wrapped as a {@link MethodInvoker}.
      */
     public Stream<MethodInvoker<?>> getMethods(Class<?> clazz, Predicate<Method> filter) {
         Map<String, Method> unique = new LinkedHashMap<>();
-        Class<?> current = clazz;
-        while (current != null) {
-            for (Method method : current.getDeclaredMethods()) {
+        for (Class<?> type : TypeHierarchy.searchOrder(clazz)) {
+            // Inherited interfaces contribute only their concrete default methods: a static
+            // interface method is not inherited, and an abstract one is implemented somewhere on
+            // the class chain (already scanned). The target type itself keeps full visibility.
+            boolean defaultsOnly = type != clazz && type.isInterface();
+            for (Method method : type.getDeclaredMethods()) {
+                if (defaultsOnly && !method.isDefault()) {
+                    continue;
+                }
                 String signature = method.getName() + Arrays.toString(method.getParameterTypes());
                 Method existing = unique.get(signature);
-                // Nearest declaration wins; a real method always wins over a synthetic
-                // bridge of the same erased signature (a covariant override emits both).
+                // Nearest declaration wins (the class tier precedes interfaces); a real method
+                // always wins over a synthetic bridge of the same erased signature (a covariant
+                // override emits both).
                 if (existing == null || (isBridgeLike(existing) && !isBridgeLike(method))) {
                     unique.put(signature, method);
                 }
             }
-            current = current.getSuperclass();
         }
         return unique.values().stream()
                 .filter(filter)
@@ -109,13 +119,19 @@ public final class MethodReflection {
         Method exactBridge = null;
         Method compatibleReal = null;
         Method compatibleBridge = null;
-        Class<?> current = clazz;
-        while (current != null) {
-            List<Method> byArity = Arrays.stream(current.getDeclaredMethods())
+        for (Class<?> type : TypeHierarchy.searchOrder(clazz)) {
+            // Inherited interfaces contribute only their concrete default methods (a static
+            // interface method is not inherited; an abstract one is implemented on the class chain
+            // already scanned). The target type itself keeps full visibility.
+            boolean defaultsOnly = type != clazz && type.isInterface();
+            List<Method> byArity = Arrays.stream(type.getDeclaredMethods())
                     .sorted(Comparator.comparingInt(method -> method.getParameterTypes().length))
                     .collect(Collectors.toList());
             for (Method method : byArity) {
                 if (name != null && !method.getName().equals(name)) {
+                    continue;
+                }
+                if (defaultsOnly && !method.isDefault()) {
                     continue;
                 }
                 boolean bridge = isBridgeLike(method);
@@ -142,7 +158,6 @@ public final class MethodReflection {
                     }
                 }
             }
-            current = current.getSuperclass();
         }
         if (exactBridge != null) {
             return exactBridge;
