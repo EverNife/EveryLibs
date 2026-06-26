@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
  * across implemented interfaces (so interface constants are found), and every resolved accessor is
  * cached.
  * <p>
- * A stateless singleton reached through {@code FCReflectionUtil.fields()} or {@link #INSTANCE}.
+ * A stateless singleton reached through {@code FCReflectionUtil.getFields()} or {@link #INSTANCE}.
  */
 public final class FieldReflection {
 

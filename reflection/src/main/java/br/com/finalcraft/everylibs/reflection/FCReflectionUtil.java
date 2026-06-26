@@ -13,9 +13,9 @@ import br.com.finalcraft.everylibs.reflection.lookup.MethodReflection;
  * Each accessor returns a stateless singleton so the whole API is reachable from one
  * import, member-type first:
  * <pre>{@code
- *   FCReflectionUtil.methods().getMethod(Foo.class, "bar", int.class);
- *   FCReflectionUtil.fields().getField(Foo.class, "name", String.class);
- *   FCReflectionUtil.classes().getClass("net.minecraft.server.Foo");
+ *   FCReflectionUtil.getMethods().getMethod(Foo.class, "bar", int.class);
+ *   FCReflectionUtil.getFields().getField(Foo.class, "name", String.class);
+ *   FCReflectionUtil.getClasses().getClass("net.minecraft.server.Foo");
  * }</pre>
  * For a class-first fluent style, use {@link #of(Class)} (a {@link ClassReflect}
  * handle): {@code FCReflectionUtil.of(Foo.class).method("bar", int.class)}.
@@ -25,23 +25,23 @@ public final class FCReflectionUtil {
     private FCReflectionUtil() {
     }
 
-    public static FieldReflection fields() {
+    public static FieldReflection getFields() {
         return FieldReflection.INSTANCE;
     }
 
-    public static MethodReflection methods() {
+    public static MethodReflection getMethods() {
         return MethodReflection.INSTANCE;
     }
 
-    public static ConstructorReflection constructors() {
+    public static ConstructorReflection getConstructors() {
         return ConstructorReflection.INSTANCE;
     }
 
-    public static ClassReflection classes() {
+    public static ClassReflection getClasses() {
         return ClassReflection.INSTANCE;
     }
 
-    public static AnnotationReflection annotations() {
+    public static AnnotationReflection getAnnotations() {
         return AnnotationReflection.INSTANCE;
     }
 

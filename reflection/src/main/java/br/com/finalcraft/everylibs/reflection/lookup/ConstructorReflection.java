@@ -15,7 +15,7 @@ import java.lang.reflect.Constructor;
  * {@link #getConstructor(Class, Class[])} returns an invoker, or {@code null} if no matching
  * constructor exists — a miss is not an exception. Every resolved invoker is cached.
  * <p>
- * A stateless singleton reached through {@code FCReflectionUtil.constructors()} or
+ * A stateless singleton reached through {@code FCReflectionUtil.getConstructors()} or
  * {@link #INSTANCE}.
  */
 public final class ConstructorReflection {

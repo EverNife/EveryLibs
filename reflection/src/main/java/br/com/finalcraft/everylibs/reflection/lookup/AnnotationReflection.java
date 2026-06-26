@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * marker annotations frequently sit on interfaces (e.g. {@code CraftPlayer} → {@code Player} →
  * {@code HumanEntity}), not just superclasses. A miss returns {@code null}, never an exception.
  * <p>
- * A stateless singleton reached through {@code FCReflectionUtil.annotations()} or {@link #INSTANCE}.
+ * A stateless singleton reached through {@code FCReflectionUtil.getAnnotations()} or {@link #INSTANCE}.
  */
 public final class AnnotationReflection {
 

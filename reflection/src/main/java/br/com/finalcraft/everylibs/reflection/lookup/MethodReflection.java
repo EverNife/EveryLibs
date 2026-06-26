@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  * (or a superclass) shadows an inherited {@code default} of the same name, and a real
  * method wins over a synthetic bridge of the same signature.
  * <p>
- * A stateless singleton reached through {@code FCReflectionUtil.methods()} or
+ * A stateless singleton reached through {@code FCReflectionUtil.getMethods()} or
  * {@link #INSTANCE}.
  */
 public final class MethodReflection {

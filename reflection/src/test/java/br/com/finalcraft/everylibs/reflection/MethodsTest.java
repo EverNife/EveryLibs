@@ -85,14 +85,14 @@ class MethodsTest {
 
     @Test
     void invokesStaticMethod() {
-        MethodInvoker<String> greet = FCReflectionUtil.methods().getMethod(StaticHolder.class, "greet", String.class);
+        MethodInvoker<String> greet = FCReflectionUtil.getMethods().getMethod(StaticHolder.class, "greet", String.class);
         assertTrue(greet.isStatic());
         assertEquals("hi bob", greet.invoke(null, "bob"));
     }
 
     @Test
     void singleArrayArgumentIsNotReWrapped() {
-        MethodInvoker<Integer> count = FCReflectionUtil.methods().getMethod(ArrayTarget.class, "count", Object[].class);
+        MethodInvoker<Integer> count = FCReflectionUtil.getMethods().getMethod(ArrayTarget.class, "count", Object[].class);
         Object[] array = {"a", "b", "c"};
         // The array is passed as a single argument; it must land on the array parameter as-is.
         assertEquals(3, count.invoke(new ArrayTarget(), new Object[]{array}));
@@ -101,19 +101,19 @@ class MethodsTest {
     @Test
     void typedLookupPreservesReturnTypeAcrossSuperclasses() {
         // Derived has no make(); Base.make() returns Object, so a String-typed lookup must miss.
-        assertNull(FCReflectionUtil.methods().getTypedMethod(Derived.class, "make", String.class));
+        assertNull(FCReflectionUtil.getMethods().getTypedMethod(Derived.class, "make", String.class));
 
         // A matching return type still resolves through the superclass.
-        MethodInvoker<String> name = FCReflectionUtil.methods().getTypedMethod(TypedDerived.class, "name", String.class);
+        MethodInvoker<String> name = FCReflectionUtil.getMethods().getTypedMethod(TypedDerived.class, "name", String.class);
         assertEquals("n", name.invoke(new TypedDerived()));
     }
 
     @Test
     void getMethodsFiltersWithPredicateAndFindsPrivateMembers() {
-        long starting = FCReflectionUtil.methods().getMethods(MultiMethod.class, m -> m.getName().startsWith("a")).count();
+        long starting = FCReflectionUtil.getMethods().getMethods(MultiMethod.class, m -> m.getName().startsWith("a")).count();
         assertEquals(1, starting);
 
-        List<String> declared = FCReflectionUtil.methods().getMethods(MultiMethod.class, m -> m.getDeclaringClass() == MultiMethod.class)
+        List<String> declared = FCReflectionUtil.getMethods().getMethods(MultiMethod.class, m -> m.getDeclaringClass() == MultiMethod.class)
                 .map(invoker -> invoker.getMethod().getName())
                 .collect(Collectors.toList());
         assertTrue(declared.contains("gamma")); // private method discovered (declared scan)
@@ -121,17 +121,17 @@ class MethodsTest {
 
     @Test
     void returnsNullWhenMethodAbsent() {
-        assertNull(FCReflectionUtil.methods().getMethod(StaticHolder.class, "nope"));
+        assertNull(FCReflectionUtil.getMethods().getMethod(StaticHolder.class, "nope"));
     }
 
     @Test
     void prefersRealMethodOverSyntheticBridge() {
-        MethodInvoker<String> real = FCReflectionUtil.methods().getTypedMethod(CovChild.class, "make", String.class);
+        MethodInvoker<String> real = FCReflectionUtil.getMethods().getTypedMethod(CovChild.class, "make", String.class);
         assertFalse(real.getMethod().isBridge());
         assertEquals(String.class, real.getMethod().getReturnType());
         assertEquals("child", real.invoke(new CovChild()));
 
-        MethodInvoker<?> viaStream = FCReflectionUtil.methods().getMethods(CovChild.class, m -> m.getName().equals("make"))
+        MethodInvoker<?> viaStream = FCReflectionUtil.getMethods().getMethods(CovChild.class, m -> m.getName().equals("make"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("expected a make() method"));
         assertFalse(viaStream.getMethod().isBridge());
@@ -140,7 +140,7 @@ class MethodsTest {
 
     @Test
     void invocationReportsTheUserExceptionAsCause() {
-        MethodInvoker<Void> boom = FCReflectionUtil.methods().getMethod(Thrower.class, "boom");
+        MethodInvoker<Void> boom = FCReflectionUtil.getMethods().getMethod(Thrower.class, "boom");
         ReflectionException ex = assertThrows(ReflectionException.class, () -> boom.invoke(new Thrower()));
         assertTrue(ex.getCause() instanceof IllegalStateException);
         assertEquals("boom", ex.getCause().getMessage());
@@ -149,22 +149,22 @@ class MethodsTest {
     @Test
     void matchesPrimitiveParamAgainstWrapperToken() {
         // No exact match for [Double]; the primitive-compatible fallback finds timesTwo(double).
-        MethodInvoker<Double> m = FCReflectionUtil.methods().getMethod(Primitives.class, "timesTwo", Double.class);
+        MethodInvoker<Double> m = FCReflectionUtil.getMethods().getMethod(Primitives.class, "timesTwo", Double.class);
         assertEquals(6.0, m.invoke(new Primitives(), 3.0));
     }
 
     @Test
     void invokeStaticSkipsTheNullTarget() {
-        MethodInvoker<String> greet = FCReflectionUtil.methods().getMethod(StaticHolder.class, "greet", String.class);
+        MethodInvoker<String> greet = FCReflectionUtil.getMethods().getMethod(StaticHolder.class, "greet", String.class);
         assertEquals("hi bob", greet.invokeStatic("bob"));
 
-        MethodInvoker<Integer> count = FCReflectionUtil.methods().getMethod(ArrayTarget.class, "count", Object[].class);
+        MethodInvoker<Integer> count = FCReflectionUtil.getMethods().getMethod(ArrayTarget.class, "count", Object[].class);
         assertThrows(ReflectionException.class, () -> count.invokeStatic((Object) new Object[0]));
     }
 
     @Test
     void invokeRejectsWrongArity() {
-        MethodInvoker<String> greet = FCReflectionUtil.methods().getMethod(StaticHolder.class, "greet", String.class);
+        MethodInvoker<String> greet = FCReflectionUtil.getMethods().getMethod(StaticHolder.class, "greet", String.class);
         ReflectionException ex = assertThrows(ReflectionException.class, () -> greet.invoke(null, "a", "b"));
         assertTrue(ex.getMessage().contains("expects 1"));
     }

@@ -25,7 +25,7 @@ public class FCExecutorsUtil {
     public static ExecutorService createVirtualExecutorIfPossible(String identifierOfNotPossible) {
         if (FCJavaVersion.isHigherEquals(FCJavaVersion.JAVA_21)) {
             // Virtual threads for actual execution, on Java 21+ we can use Virtual Threads
-            return FCReflectionUtil.methods().<ExecutorService>getMethod(Executors.class, "newVirtualThreadPerTaskExecutor")
+            return FCReflectionUtil.getMethods().<ExecutorService>getMethod(Executors.class, "newVirtualThreadPerTaskExecutor")
                     .invoke(null);
         } else {
             // Fallback to a fixed thread pool on lower Java versions, this is not ideal but better than nothing

@@ -11,29 +11,29 @@ class ClassesTest {
 
     @Test
     void getClassResolvesOrReturnsNull() {
-        assertEquals(String.class, FCReflectionUtil.classes().getClass("java.lang.String"));
-        assertNull(FCReflectionUtil.classes().getClass("no.such.ClassXyz"));
+        assertEquals(String.class, FCReflectionUtil.getClasses().getClass("java.lang.String"));
+        assertNull(FCReflectionUtil.getClasses().getClass("no.such.ClassXyz"));
     }
 
     @Test
     void getUntypedClassResolves() {
-        Class<String> stringClass = FCReflectionUtil.classes().getUntypedClass("java.lang.String");
+        Class<String> stringClass = FCReflectionUtil.getClasses().getUntypedClass("java.lang.String");
         assertEquals(String.class, stringClass);
     }
 
     @Test
     void isClassLoadedReflectsAvailability() {
-        assertTrue(FCReflectionUtil.classes().isClassLoaded("java.lang.Integer"));
-        assertFalse(FCReflectionUtil.classes().isClassLoaded("no.such.ClassXyz"));
+        assertTrue(FCReflectionUtil.getClasses().isClassLoaded("java.lang.Integer"));
+        assertFalse(FCReflectionUtil.getClasses().isClassLoaded("no.such.ClassXyz"));
     }
 
     @Test
     void loaderAwareLookupAndFirstClass() {
         ClassLoader loader = getClass().getClassLoader();
-        assertEquals(String.class, FCReflectionUtil.classes().getClass("java.lang.String", loader));
-        assertNull(FCReflectionUtil.classes().getClass("no.such.X", loader));
+        assertEquals(String.class, FCReflectionUtil.getClasses().getClass("java.lang.String", loader));
+        assertNull(FCReflectionUtil.getClasses().getClass("no.such.X", loader));
 
-        Class<?> first = FCReflectionUtil.classes().getFirstClass(loader, "no.such.A", "java.lang.Integer", "no.such.B");
+        Class<?> first = FCReflectionUtil.getClasses().getFirstClass(loader, "no.such.A", "java.lang.Integer", "no.such.B");
         assertEquals(Integer.class, first);
     }
 }

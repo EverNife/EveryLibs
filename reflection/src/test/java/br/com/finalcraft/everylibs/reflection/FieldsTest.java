@@ -28,7 +28,7 @@ class FieldsTest {
 
     @Test
     void readsAndWritesInstanceField() {
-        FieldAccessor<String> accessor = FCReflectionUtil.fields().getField(Holder.class, "secret", String.class);
+        FieldAccessor<String> accessor = FCReflectionUtil.getFields().getField(Holder.class, "secret", String.class);
         Holder holder = new Holder();
 
         assertEquals("init", accessor.get(holder));
@@ -40,13 +40,13 @@ class FieldsTest {
 
     @Test
     void hasFieldReturnsFalseForNullTarget() {
-        FieldAccessor<String> accessor = FCReflectionUtil.fields().getField(Holder.class, "secret", String.class);
+        FieldAccessor<String> accessor = FCReflectionUtil.getFields().getField(Holder.class, "secret", String.class);
         assertFalse(accessor.hasField(null));
     }
 
     @Test
     void readsAndWritesStaticField() {
-        FieldAccessor<Integer> accessor = FCReflectionUtil.fields().getField(Holder.class, "counter", int.class);
+        FieldAccessor<Integer> accessor = FCReflectionUtil.getFields().getField(Holder.class, "counter", int.class);
 
         assertEquals(5, accessor.get(null));
         accessor.set(null, 9);
@@ -58,15 +58,15 @@ class FieldsTest {
 
     @Test
     void singleLookupWalksSuperclasses() {
-        FieldAccessor<Integer> accessor = FCReflectionUtil.fields().getField(FieldChild.class, "inherited", int.class);
+        FieldAccessor<Integer> accessor = FCReflectionUtil.getFields().getField(FieldChild.class, "inherited", int.class);
         FieldChild child = new FieldChild();
         assertEquals(1, accessor.get(child));
     }
 
     @Test
     void getAllFieldsHonorsIncludeInherited() {
-        List<FieldAccessor<?>> declaredOnly = FCReflectionUtil.fields().getAllFields(FieldChild.class, false);
-        List<FieldAccessor<?>> withInherited = FCReflectionUtil.fields().getAllFields(FieldChild.class, true);
+        List<FieldAccessor<?>> declaredOnly = FCReflectionUtil.getFields().getAllFields(FieldChild.class, false);
+        List<FieldAccessor<?>> withInherited = FCReflectionUtil.getFields().getAllFields(FieldChild.class, true);
 
         assertEquals(1, declaredOnly.size());
         assertEquals("own", declaredOnly.get(0).getField().getName());
@@ -78,45 +78,45 @@ class FieldsTest {
 
     @Test
     void returnsNullWhenFieldAbsent() {
-        assertNull(FCReflectionUtil.fields().getField(Holder.class, "nonExistentXyz", String.class));
+        assertNull(FCReflectionUtil.getFields().getField(Holder.class, "nonExistentXyz", String.class));
     }
 
     @Test
     void resolvesByClassName() {
-        FieldAccessor<Integer> accessor = FCReflectionUtil.fields().getField(FieldChild.class.getName(), "inherited");
+        FieldAccessor<Integer> accessor = FCReflectionUtil.getFields().getField(FieldChild.class.getName(), "inherited");
         assertEquals(1, accessor.get(new FieldChild()));
         // A class that cannot be resolved is a miss, not an exception.
-        assertNull(FCReflectionUtil.fields().getField("no.such.ClassXyz", "inherited"));
+        assertNull(FCReflectionUtil.getFields().getField("no.such.ClassXyz", "inherited"));
     }
 
     @Test
     void fieldWalkerIsLazyAndRespectsInheritance() {
-        Iterator<FieldAccessor<?>> deep = FCReflectionUtil.fields().fieldWalker(FieldChild.class, true);
+        Iterator<FieldAccessor<?>> deep = FCReflectionUtil.getFields().fieldWalker(FieldChild.class, true);
         assertTrue(deep.hasNext());
         assertEquals("own", deep.next().getField().getName());
         assertEquals("inherited", deep.next().getField().getName());
         assertFalse(deep.hasNext());
 
-        Iterator<FieldAccessor<?>> shallow = FCReflectionUtil.fields().fieldWalker(FieldChild.class, false);
+        Iterator<FieldAccessor<?>> shallow = FCReflectionUtil.getFields().fieldWalker(FieldChild.class, false);
         assertEquals("own", shallow.next().getField().getName());
         assertFalse(shallow.hasNext()); // does not descend into FieldParent
     }
 
     @Test
     void staticConvenienceOverloads() {
-        FieldAccessor<Integer> counter = FCReflectionUtil.fields().getField(Holder.class, "counter", int.class);
+        FieldAccessor<Integer> counter = FCReflectionUtil.getFields().getField(Holder.class, "counter", int.class);
         assertEquals(5, counter.get());     // no-arg get()
         counter.set(11);                    // set(value)
         assertEquals(11, counter.get());
         counter.set(5);                     // restore for isolation
 
-        FieldAccessor<String> secret = FCReflectionUtil.fields().getField(Holder.class, "secret", String.class);
+        FieldAccessor<String> secret = FCReflectionUtil.getFields().getField(Holder.class, "secret", String.class);
         assertThrows(ReflectionException.class, secret::get); // not static
     }
 
     @Test
     void setRejectsWrongValueType() {
-        FieldAccessor<Object> secret = FCReflectionUtil.fields().getField(Holder.class, "secret");
+        FieldAccessor<Object> secret = FCReflectionUtil.getFields().getField(Holder.class, "secret");
         ReflectionException ex = assertThrows(ReflectionException.class, () -> secret.set(new Holder(), 123));
         assertTrue(ex.getMessage().contains("expects java.lang.String"));
     }

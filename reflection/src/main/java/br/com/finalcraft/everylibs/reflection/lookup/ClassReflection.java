@@ -20,7 +20,7 @@ import br.com.finalcraft.everylibs.reflection.internal.ReflectionCache;
  * re-resolved. The loader overload uses {@link Class#forName(String, boolean, ClassLoader)} with
  * {@code initialize=false} (no {@code <clinit>}), sees other plugins' classes, and is not cached.
  * <p>
- * A stateless singleton reached through {@code FCReflectionUtil.classes()} or {@link #INSTANCE}.
+ * A stateless singleton reached through {@code FCReflectionUtil.getClasses()} or {@link #INSTANCE}.
  */
 public final class ClassReflection {
 

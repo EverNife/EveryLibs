@@ -68,14 +68,14 @@ class InterfaceWalkTest {
 
     @Test
     void findsUnoverriddenInterfaceDefaultMethod() {
-        MethodInvoker<String> describe = FCReflectionUtil.methods().getMethod(Plain.class, "describe");
+        MethodInvoker<String> describe = FCReflectionUtil.getMethods().getMethod(Plain.class, "describe");
         assertNotNull(describe);
         assertEquals("named", describe.invoke(new Plain()));
     }
 
     @Test
     void classOverrideShadowsInterfaceDefault() {
-        MethodInvoker<String> describe = FCReflectionUtil.methods().getMethod(OverridesDescribe.class, "describe");
+        MethodInvoker<String> describe = FCReflectionUtil.getMethods().getMethod(OverridesDescribe.class, "describe");
         assertEquals(OverridesDescribe.class, describe.getMethod().getDeclaringClass());
         assertEquals("overridden", describe.invoke(new OverridesDescribe()));
     }
@@ -83,7 +83,7 @@ class InterfaceWalkTest {
     @Test
     void nearestInterfaceDefaultWins() {
         // RefinedNamed.describe() overrides Named.describe(); the nearer interface must win.
-        MethodInvoker<String> describe = FCReflectionUtil.methods().getMethod(RefinedImpl.class, "describe");
+        MethodInvoker<String> describe = FCReflectionUtil.getMethods().getMethod(RefinedImpl.class, "describe");
         assertEquals(RefinedNamed.class, describe.getMethod().getDeclaringClass());
         assertEquals("refined", describe.invoke(new RefinedImpl()));
     }
@@ -91,12 +91,12 @@ class InterfaceWalkTest {
     @Test
     void staticInterfaceMethodIsNotInherited() {
         // A static interface method is callable only on the interface, never on an implementor.
-        assertNull(FCReflectionUtil.methods().getMethod(Plain.class, "origin"));
+        assertNull(FCReflectionUtil.getMethods().getMethod(Plain.class, "origin"));
     }
 
     @Test
     void findsInterfaceConstant() {
-        FieldAccessor<String> constant = FCReflectionUtil.fields().getField(Plain.class, "CONSTANT", String.class);
+        FieldAccessor<String> constant = FCReflectionUtil.getFields().getField(Plain.class, "CONSTANT", String.class);
         assertNotNull(constant);
         assertTrue(constant.isStatic());
         assertEquals("k", constant.get(null));
@@ -104,12 +104,12 @@ class InterfaceWalkTest {
 
     @Test
     void getMethodsIncludesDefaultsButNotStatics() {
-        long defaults = FCReflectionUtil.methods()
+        long defaults = FCReflectionUtil.getMethods()
                 .getMethods(Plain.class, method -> method.getName().equals("describe"))
                 .count();
         assertEquals(1, defaults);
 
-        long statics = FCReflectionUtil.methods()
+        long statics = FCReflectionUtil.getMethods()
                 .getMethods(Plain.class, method -> method.getName().equals("origin"))
                 .count();
         assertEquals(0, statics);
@@ -117,12 +117,12 @@ class InterfaceWalkTest {
 
     @Test
     void getAllFieldsIncludesInterfaceConstantsOnlyWhenInherited() {
-        List<String> declaredOnly = FCReflectionUtil.fields().getAllFields(Plain.class, false).stream()
+        List<String> declaredOnly = FCReflectionUtil.getFields().getAllFields(Plain.class, false).stream()
                 .map(accessor -> accessor.getField().getName())
                 .collect(Collectors.toList());
         assertFalse(declaredOnly.contains("CONSTANT")); // Plain declares no fields of its own
 
-        List<String> withInherited = FCReflectionUtil.fields().getAllFields(Plain.class, true).stream()
+        List<String> withInherited = FCReflectionUtil.getFields().getAllFields(Plain.class, true).stream()
                 .map(accessor -> accessor.getField().getName())
                 .collect(Collectors.toList());
         assertTrue(withInherited.contains("CONSTANT"));
