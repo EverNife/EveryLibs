@@ -1,0 +1,4 @@
+[submodule "idea-plugin"]
+	path = idea-plugin
+	url = https://github.com/EverNife/everylibs-idea-plugin.git
+	branch = main
