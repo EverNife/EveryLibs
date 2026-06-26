@@ -30,6 +30,14 @@ start with [Installation](https://github.com/EverNife/EveryLibs/wiki/Installatio
 `reflection` is a leaf (pure `java.lang.reflect` + `java.lang.invoke`). `utils` and
 `executors` expose `common` via `api`, so it arrives transitively with them.
 
+## IntelliJ IDEA plugin
+
+Reflection-aware **autocomplete, navigation and rename** for EveryLibs lookups — just like the
+IDE already does for `Class.getDeclaredField("…")`. Inside the member-name (or class-name) string
+of `getField`/`getMethod`/`ClassReflect` calls, it completes the target class's members. It lives
+in the [`idea-plugin/`](idea-plugin) **git submodule** (published separately); see its README to
+build and install. Run `git submodule update --init` to fetch it.
+
 ## Using a module (Gradle)
 
 ```groovy
