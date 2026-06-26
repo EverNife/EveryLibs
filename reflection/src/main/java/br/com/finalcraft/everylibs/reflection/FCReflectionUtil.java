@@ -18,7 +18,7 @@ import br.com.finalcraft.everylibs.reflection.lookup.MethodReflection;
  *   FCReflectionUtil.getClasses().getClass("net.minecraft.server.Foo");
  * }</pre>
  * For a class-first fluent style, use {@link #of(Class)} (a {@link ClassReflect}
- * handle): {@code FCReflectionUtil.of(Foo.class).method("bar", int.class)}.
+ * handle): {@code FCReflectionUtil.of(Foo.class).getMethod("bar", int.class)}.
  */
 public final class FCReflectionUtil {
 

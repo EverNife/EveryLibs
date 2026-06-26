@@ -22,11 +22,11 @@ class ClassReflectTest {
     void typedHandleConstructsAndInvokesWithoutCasts() {
         ClassReflect<Widget> handle = FCReflectionUtil.of(Widget.class);
 
-        ConstructorInvoker<Widget> ctor = handle.constructor(int.class); // ConstructorInvoker<Widget>, no cast needed
+        ConstructorInvoker<Widget> ctor = handle.getConstructor(int.class); // ConstructorInvoker<Widget>, no cast needed
         Widget widget = ctor.newInstance(7);
         assertEquals(7, widget.id);
 
-        MethodInvoker<String> label = handle.typedMethod("label", String.class); // R bound to String
+        MethodInvoker<String> label = handle.getTypedMethod("label", String.class); // R bound to String
         assertEquals("w7", label.invoke(widget));
     }
 

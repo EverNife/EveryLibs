@@ -59,49 +59,49 @@ public final class ClassReflect<C> {
     }
 
     @Nullable
-    public <T> FieldAccessor<T> field(String name) {
+    public <T> FieldAccessor<T> getField(String name) {
         return FieldReflection.INSTANCE.getField(target, name);
     }
 
     @Nullable
-    public <T> FieldAccessor<T> field(String name, Class<T> fieldType) {
+    public <T> FieldAccessor<T> getField(String name, Class<T> fieldType) {
         return FieldReflection.INSTANCE.getField(target, name, fieldType);
     }
 
     @Nullable
-    public <T> FieldAccessor<T> field(Class<T> fieldType, int index) {
+    public <T> FieldAccessor<T> getField(Class<T> fieldType, int index) {
         return FieldReflection.INSTANCE.getField(target, fieldType, index);
     }
 
-    public List<FieldAccessor<?>> fields(boolean includeInherited) {
+    public List<FieldAccessor<?>> getFields(boolean includeInherited) {
         return FieldReflection.INSTANCE.getAllFields(target, includeInherited);
     }
 
-    public Iterator<FieldAccessor<?>> fieldWalker(boolean includeInherited) {
+    public Iterator<FieldAccessor<?>> getFieldWalker(boolean includeInherited) {
         return FieldReflection.INSTANCE.fieldWalker(target, includeInherited);
     }
 
     @Nullable
-    public <T> MethodInvoker<T> method(String name, Class<?>... params) {
+    public <T> MethodInvoker<T> getMethod(String name, Class<?>... params) {
         return MethodReflection.INSTANCE.getMethod(target, name, params);
     }
 
     @Nullable
-    public <R> MethodInvoker<R> typedMethod(String name, Class<R> returnType, Class<?>... params) {
+    public <R> MethodInvoker<R> getTypedMethod(String name, Class<R> returnType, Class<?>... params) {
         return MethodReflection.INSTANCE.getTypedMethod(target, name, returnType, params);
     }
 
-    public Stream<MethodInvoker<?>> methods(Predicate<Method> filter) {
+    public Stream<MethodInvoker<?>> getMethods(Predicate<Method> filter) {
         return MethodReflection.INSTANCE.getMethods(target, filter);
     }
 
     @Nullable
-    public ConstructorInvoker<C> constructor(Class<?>... params) {
+    public ConstructorInvoker<C> getConstructor(Class<?>... params) {
         return ConstructorReflection.INSTANCE.getConstructor(target, params);
     }
 
     @Nullable
-    public <A extends Annotation> A annotation(Class<A> type) {
+    public <A extends Annotation> A getAnnotation(Class<A> type) {
         return AnnotationReflection.INSTANCE.getAnnotationDeeply(target, type);
     }
 }
