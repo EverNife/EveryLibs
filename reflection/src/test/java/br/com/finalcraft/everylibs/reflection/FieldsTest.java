@@ -82,6 +82,14 @@ class FieldsTest {
     }
 
     @Test
+    void resolvesByClassName() {
+        FieldAccessor<Integer> accessor = FCReflectionUtil.fields().getField(FieldChild.class.getName(), "inherited");
+        assertEquals(1, accessor.get(new FieldChild()));
+        // A class that cannot be resolved is a miss, not an exception.
+        assertNull(FCReflectionUtil.fields().getField("no.such.ClassXyz", "inherited"));
+    }
+
+    @Test
     void fieldWalkerIsLazyAndRespectsInheritance() {
         Iterator<FieldAccessor<?>> deep = FCReflectionUtil.fields().fieldWalker(FieldChild.class, true);
         assertTrue(deep.hasNext());

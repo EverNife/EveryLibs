@@ -61,6 +61,12 @@ public final class FieldReflection {
     }
 
     @Nullable
+    public <T> FieldAccessor<T> getField(String className, String name) {
+        Class<?> target = ClassReflection.INSTANCE.getClass(className);
+        return target == null ? null : getField(target, name);
+    }
+
+    @Nullable
     public <T> FieldAccessor<T> getField(String className, String name, Class<T> fieldType) {
         Class<?> target = ClassReflection.INSTANCE.getClass(className);
         return target == null ? null : getField(target, name, fieldType);
