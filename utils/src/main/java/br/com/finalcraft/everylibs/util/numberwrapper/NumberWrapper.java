@@ -166,7 +166,9 @@ public class NumberWrapper<N extends Number> implements Comparable<NumberWrapper
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        //Match equals(), which compares doubleValue(): a Byte and a Double of the same numeric
+        //value must produce the same hash, otherwise they break HashSet/HashMap contracts.
+        return Double.hashCode(value.doubleValue());
     }
 
     @Override
