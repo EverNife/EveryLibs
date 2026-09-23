@@ -13,7 +13,7 @@ import br.com.finalcraft.everylibs.reflection.internal.ReflectionCache;
  * {@link #getClass(String)} returns the class, or {@code null} if it cannot be found — a miss is
  * not an exception. A class that is present but fails to <em>link</em> (e.g. a moved dependency on
  * this server version) is also treated as a miss (returns {@code null}) rather than escaping as an
- * {@link Error}.
+ * {@link Error}; {@link #lookupClass(String)} is the lookup that tells the two apart.
  * <p>
  * The single-argument lookup uses {@link Class#forName(String)} (initializing, via the module's
  * loader) and caches through {@link WeakReference} so a class from a dead reload generation is
@@ -30,34 +30,56 @@ public final class ClassReflection {
     }
 
     /**
-     * @return the class for {@code lookupName}, or {@code null} if absent or unlinkable on this runtime.
+     * Resolve {@code lookupName} through the module loader (initializing) and say which of found,
+     * absent or unlinkable it was. Only a found class is cached.
+     */
+    public ClassLookup lookupClass(String lookupName) {
+        Class<?> cached = peek(lookupName);
+        if (cached != null) {
+            return ClassLookup.found(lookupName, cached);
+        }
+        try {
+            return ClassLookup.found(lookupName, cache(lookupName, Class.forName(lookupName)));
+        } catch (ClassNotFoundException e) {
+            return ClassLookup.absent(lookupName);
+        } catch (LinkageError e) {
+            return ClassLookup.unlinkable(lookupName, e);
+        }
+    }
+
+    /**
+     * Resolve {@code lookupName} through {@code loader} without initializing it (no {@code <clinit>})
+     * and say which of found, absent or unlinkable it was. Not cached.
+     */
+    public ClassLookup lookupClass(String lookupName, ClassLoader loader) {
+        try {
+            return ClassLookup.found(lookupName, Class.forName(lookupName, false, loader));
+        } catch (ClassNotFoundException e) {
+            return ClassLookup.absent(lookupName);
+        } catch (LinkageError e) {
+            return ClassLookup.unlinkable(lookupName, e);
+        }
+    }
+
+    /**
+     * @return the class for {@code lookupName}, or {@code null} if absent or unlinkable on this runtime -
+     * {@link #lookupClass(String)} tells those two apart.
      */
     @Nullable
     public Class<?> getClass(String lookupName) {
-        Class<?> cached = peek(lookupName);
-        if (cached != null) {
-            return cached;
-        }
-        try {
-            return cache(lookupName, Class.forName(lookupName));
-        } catch (ClassNotFoundException | LinkageError e) {
-            return null;
-        }
+        return lookupClass(lookupName).getType();
     }
 
     /**
      * Resolve a class through a specific {@link ClassLoader} without initializing it (no
      * {@code <clinit>}). Useful for probing NMS/OBC types from the caller's plugin loader.
      *
-     * @return the class, or {@code null} if absent or unlinkable through {@code loader}.
+     * @return the class, or {@code null} if absent or unlinkable through {@code loader} -
+     * {@link #lookupClass(String, ClassLoader)} tells those two apart.
      */
     @Nullable
     public Class<?> getClass(String lookupName, ClassLoader loader) {
-        try {
-            return Class.forName(lookupName, false, loader);
-        } catch (ClassNotFoundException | LinkageError e) {
-            return null;
-        }
+        return lookupClass(lookupName, loader).getType();
     }
 
     /**
@@ -108,12 +130,7 @@ public final class ClassReflection {
      * @return {@code true} if the named class can be loaded (and is linkable) right now.
      */
     public boolean isClassLoaded(String name) {
-        try {
-            return Class.forName(name) != null;
-        } catch (ClassNotFoundException | LinkageError ignored) {
-            // LinkageError covers NoClassDefFoundError (present but unlinkable on this runtime).
-            return false;
-        }
+        return lookupClass(name).isFound();
     }
 
     private static Class<?> peek(String name) {
