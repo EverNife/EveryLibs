@@ -47,9 +47,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'br.com.finalcraft.everylibs:everylibs-reflection:1.0.0'
-    // implementation 'br.com.finalcraft.everylibs:everylibs-utils:1.0.0'
-    // implementation 'br.com.finalcraft.everylibs:everylibs-executors:1.0.0'
+    implementation 'br.com.finalcraft.everylibs:everylibs-reflection:1.1.0'
+    // implementation 'br.com.finalcraft.everylibs:everylibs-utils:1.1.0'
+    // implementation 'br.com.finalcraft.everylibs:everylibs-executors:1.1.0'
 }
 ```
 

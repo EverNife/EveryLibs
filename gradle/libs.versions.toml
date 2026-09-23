@@ -1,7 +1,7 @@
 [versions]
 # Project version - single source of truth. Consumed by the root build.gradle
 # (every module's `version`).
-everylibs = "1.0.0"
+everylibs = "1.1.0"
 
 # Jabel lets a modern compiler emit Java 8 bytecode (see root build.gradle).
 jabel = "1.2.0"
